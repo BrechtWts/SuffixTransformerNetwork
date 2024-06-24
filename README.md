@@ -828,7 +828,7 @@ Similar to ***SuTraN***, the activity embedding layer is shared between the enco
 The exact same training procedure, including, i.a., the [AdamW](https://pytorch.org/docs/stable/generated/torch.optim.AdamW.html) optimizer, the initial learing rate of 0.0002, dropout rate of 0.2, [ExponentialLR](https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ExponentialLR.html) learning rate scheduler, and so forth. For further details, please refer to the paper, or the extensive documentation within the training procedure modules themselves (`LSTM_seq2seq\train_procedure.py` and `SuTraN\train_procedure.py`). 
 
 #### ED-LSTM - Inference 
-As already mentioned, and similar to ***SuTraN***, AR inference is conducted by the decoder only, which iteratively predicts the activity label and timestamp (proxy) pertaining to the next event, and uses these predictions to construct a new suffix event token, after which the next elements in the two sequences can be generated. The derivation of these predictions happens identically to SuTraN, and is explained in [Appendix A](#appendix-a---auto-regressive-ar-inference-with-sutran). After AR decoding, similar to *SEP-LSTM*, an additional remaining runtime prediction is derived from summing the elapsed time predictions, i.e. $\hat{r}_k \ = \ \sum_{i=1}^{D-1}\hat{t}_{k+i}^p$, with $D$ being the decoding step at which the $\mathit{EOS}$ token is predicted by the activity prediction head. 
+As already mentioned, and similar to ***SuTraN***, AR inference is conducted by the decoder only, which iteratively predicts the activity label and timestamp (proxy) pertaining to the next event, and uses these predictions to construct a new suffix event token, after which the next elements in the two sequences can be generated. The derivation of these predictions happens identically to SuTraN, and is explained in [Appendix A](#appendix-a---auto-regressive-ar-inference-with-sutran). After AR decoding, similar to *SEP-LSTM*, an additional remaining runtime prediction is derived from summing the elapsed time predictions, i.e. $\hat{r} _ k  =  \sum^{D-1}_{i=1} \hat{t} _ {k+i}^p$, with $D$ being the decoding step at which the $\mathit{EOS}$ token is predicted by the activity prediction head. 
 
 
 #### ED-LSTM - Data Format 
@@ -958,7 +958,7 @@ Springer Nature Switzerland, 2023, pp. 146–162.
 Upon Inference, ***SuTraN***'s decoder auto-regressively generates both the activity and timestamp suffixes. 
 It starts, after the encoder has finished processing the prefix event tokens into encoder embeddings $\langle h^{p,N}_{1}, \dots, h^{p,N}_k \rangle$, with the initial suffix event token, $e_0^s$, populated with the *activity* $a_k$, *time since previous* $t_k^p$, and *time since start* $t_k^s$ features of the last observed prefix event. 
 
-At each decoding step, the decoder predicts the the next suffix event. Based on the predicted activity label $\hat{a}_{k+d}$, and timestamp (*time elapsed since previous event*) $\hat{t}_{k+d}^p$, the new *suffix event token* $e_d^s = (\tilde{a}_{k+d}, \tilde{t}_{k+d}^p, \tilde{t}_{k+d}^s)$ is derived. However, as [discussed](#6-preprocessing-numerical-features--targets), each numeric feature and target is standardized based on its own training mean and standard deviation. Hence, the different time numerics are no longer sharing the same original scale in seconds. Therefore, one can not simply set the *time elapsed since previous event* $\tilde{t}_{k+d}^p$ of the new suffix event token equal to prediction $\hat{t}_{k+d}^p$, nor set the new *time elapsed since case start* $\tilde{t}_{k+d}^s$ feature equal to the sum of $\tilde{t}_{k+d-1}^s$ with $\hat{t}_{k+d}^p$. 
+At each decoding step, the decoder predicts the the next suffix event. Based on the predicted activity label $\hat{a} _ {k+d}$, and timestamp (*time elapsed since previous event*) $\hat{t} _ {k+d}^p$, the new *suffix event token* $e_d^s = (\tilde{a} _ {k+d}, \tilde{t} _ {k+d}^p, \tilde{t} _ {k+d}^s)$ is derived. However, as [discussed](#6-preprocessing-numerical-features--targets), each numeric feature and target is standardized based on its own training mean and standard deviation. Hence, the different time numerics are no longer sharing the same original scale in seconds. Therefore, one can not simply set the *time elapsed since previous event* $\tilde{t} _ {k+d}^p$ of the new suffix event token equal to prediction $\hat{t} _ {k+d}^p$, nor set the new *time elapsed since case start* $\tilde{t} _ {k+d}^s$ feature equal to the sum of $\tilde{t} _ {k+d-1}^s$ with $\hat{t} _ {k+d}^p$. 
 
 An intermediate de-standardization step is needed. Let: 
 - $\mu^p_s, s^p_s$ and $\mu^s_s, s^s_s$ be the training means and standard deviations of the *time elapsed since previous event* $t_j^p$ and *time elapsed since case start* $t_j^s$ of the ***s***uffix event tokens. 
@@ -966,27 +966,27 @@ An intermediate de-standardization step is needed. Let:
 
 *Then* the model(s) is trained to predict timestamp suffixes according to the standardized distribution of the target features. Therefore, the following computations are needed for deriving the two time proxies of the suffix event tokens, based on the predicted timestamps: 
 
-1. ***Derived suffix event token - time elapsed since previous event $\tilde{t}_{k+d}^p$***:
+1. ***Derived suffix event token - time elapsed since previous event*** $\tilde{t} _ {k+d}^p$:
    1. De-standardize prediction $\hat{t}_{k+d}^p$ back to seconds: 
    
-      $\hat{t}_{k+d}^{p, \mathit{seconds}}$ = $\mathit{max}\{\hat{t}_{k+d}^p s^p_{\mathit{target}} \ + \ \mu^p_{\mathit{target}}, 0\}$ 
+      $\hat{t} _ {k+d}^{p, \mathit{seconds}}$ = $\mathit{max}  (\hat{t} _ {k+d}^p s^p_{\mathit{target}} \ + \ \mu^p_{\mathit{target}}, 0)$ 
 
    1. Standardize the predicted timestamp again, according to the mean and standard deviation of the suffix event feature: 
    
-      $\tilde{t}_{k+d}^p$ = $(\hat{t}_{k+d}^{p, \mathit{seconds}}- \mu^p_s) / s^p_s$
+      $\tilde{t} _ {k+d}^p$ = $(\hat{t} _ {k+d}^{p, \mathit{seconds}}- \mu^p_s) / s^p_s$
 
-1. ***Derived suffix event token - time elapsed since case start $\tilde{t}_{k+d}^s$***:
-   1. De-standardize the *time elapsed since case start* $\tilde{t}_{k+d-1}^s$ of the most recent suffix event back to seconds: 
+1. ***Derived suffix event token - time elapsed since case start*** $\tilde{t} _ {k+d}^s$ :
+   1. De-standardize the *time elapsed since case start* $\tilde{t} _ {k+d-1}^s$ of the most recent suffix event back to seconds: 
 
-      $\tilde{t}_{k+d-1}^{s, \mathit{seconds}} = \mathit{max} \{ \tilde{t}_{k+d-1}^s s^s_s + \mu^s_s, 0\}$
+      $\tilde{t} _ {k+d-1}^{s, \mathit{seconds}} = \mathit{max} ( \tilde{t} _ {k+d-1}^s s^s_s + \mu^s_s, 0)$
 
    1. Derive new *time elapsed since case start* in seconds: 
 
-      $\tilde{t}_{k+d}^{s, \mathit{seconds}} = \tilde{t}_{k+d-1}^{s, \mathit{seconds}} + \hat{t}_{k+d}^{p, \mathit{seconds}}$
+      $\tilde{t} _ {k+d}^{s, \mathit{seconds}} = \tilde{t} _ {k+d-1}^{s, \mathit{seconds}} + \hat{t} _ {k+d}^{p, \mathit{seconds}}$
 
    1. Standardize the derived *time elapsed since case start* again, according to the mean and standard deviation of the respective suffix event token feature: 
 
-      $\tilde{t}_{k+d}^s = (\tilde{t}_{k+d}^{s, \mathit{seconds}} - \mu^s_s) / s^s_s$
+      $\tilde{t} _ {k+d}^s = (\tilde{t} _ {k+d}^{s, \mathit{seconds}} - \mu^s_s) / s^s_s$
 
 > **Note**:
 >
