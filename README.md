@@ -530,9 +530,9 @@ All implementations process a sequence of prefix event tokens $\langle e^p_1,...
 
 $$\pi(o^p_k) = 
 \begin{cases}
-    \langle \hat{a}_{k+1},\dots,\hat{a}_{k+D-1}, \mathit{EOS} \rangle & \text{\textit{(1. activity suffix)}} \\
-    \langle \hat{t}_{k+1}^p,\dots,\hat{t}_{k+D-1}^p \rangle & \text{\textit{(2. timestamp suffix)}} \\
-    \hat{r}_k & \text{\textit{(3. remaining time)}}
+    \langle \hat{a} _ {k+1},\dots,\hat{a} _ {k+D-1}, \mathit{EOS} \rangle & \text{\textit{(1. activity suffix)}} \\
+    \langle \hat{t} _ {k+1}^p, \dots, \hat{t} _ {k+D-1}^p \rangle & \text{\textit{(2. timestamp suffix)}} \\
+    \hat{r} _ k & \text{\textit{(3. remaining time)}}
 \end{cases}$$
 
 The manner in which these predictions are generated however, depends on the implementation itself. **Table 3** provides an overview of the re-implemented benchmarks, and SuTraN, together with their core characteristics. 
@@ -540,8 +540,8 @@ The manner in which these predictions are generated however, depends on the impl
 ***SuTraN*** and *CRTP-LSTM* are the only two Data-Aware (DA) techniques. As such, they are capable of utilizing all available features, including dynamic event features, in the prefix event tokens. As such, and in line with *Def. 3* in the paper, each prefix event token $e^p_j \ (\in \tilde{\sigma} _ k^p)$ processed by these two techniques can be represented as: 
 
 $$
-e^p_j = \big( a_j, t^p_j, t^s_j, (\mathit{cf}^{c}_{1,j}, ..., \mathit{cf}^{c}_{m_1^c,j}), (\mathit{ef}^c_{1,j}, ..., \mathit{ef}^{c}_{m_2^c,j}),
-(\mathit{cf}^{n}_{1,j}, ..., \mathit{cf}^{n}_{m_1^n,j}), (\mathit{ef}^{n}_{1,j}, ..., \mathit{ef}^{n}_{m_2^n,j}) \big)
+e^p_j = \big( a_j, t^p_j, t^s_j, (\mathit{cf}^{c} _ {1,j}, ..., \mathit{cf}^{c} _ {m_1^c,j}), (\mathit{ef}^c _ {1,j}, ..., \mathit{ef}^{c} _ {m_2^c,j}),
+(\mathit{cf}^{n} _ {1,j}, ..., \mathit{cf}^{n} _ {m_1^n,j}), (\mathit{ef}^{n} _ {1,j}, ..., \mathit{ef}^{n} _ {m_2^n,j}) \big)
 $$
 
 with: 
@@ -597,8 +597,8 @@ Specifically, at each decoding step $d=1, ..., D$, it forecasts the next suffix 
 $$
 \pi_d(o^p_k) = 
 \begin{cases}
-    ( \hat{a}_{k+d}, \hat{t}_{k+d}^p) & \text{\textit{if}} \ d>1\\
-    ( \hat{a}_{k+d}, \hat{t}_{k+d}^p, \hat{r}_k) & \text{\textit{if}} \ d=1
+    ( \hat{a} _ {k+d}, \hat{t} _ {k+d}^p) & \text{\textit{if}} \ d>1\\
+    ( \hat{a} _ {k+d}, \hat{t} _ {k+d}^p, \hat{r}_k) & \text{\textit{if}} \ d=1
 \end{cases}
 $$
 
