@@ -321,7 +321,7 @@ In this step, we create prefix-suffix pairs from the event log data. This proces
 1. `timeLabel_df`: dataframe containing the ground-truth timestamp suffix, and remaining runtime suffix labels pertaining to the generated prefixes (and suffixes). While SuTraN is only trained to directly predict the remaining runtime given a prefix, the CRTP-LSTM is trained for predicting entire remaining runtime suffixes. Therefore, remaining time suffixes instead of scalars are generated. 
 1. `actLabel_df`: dataframe containing the ground-truth activity label suffixes. Each ground-truth suffix is appended with a final `END` token to denote the end of a case, allowing models to learn when cases end.
 
-Mathematically, each case ${\sigma}=\langle {e}_1, \dots, {e}_n \rangle$ is parsed into $n$ prefix event token sequences $\tilde{\sigma}_k^p \ (k\in \{1, \dots, n\})$. Each prefix $\tilde{\sigma}_k^p$ is accompanied by the ground-truth activity and timestamp suffix targets, as well as a scalar remaining time target. However, to cater for the training mechanism implemented in the *CRTP-LSTM* benchmark, entire remaining runtime suffixes are derived. For training **SuTraN**, as well as for evaluating the remaining runtime predictions of all models, including *CRTP-LSTM*, only the first scalar remaining runtime target is needed. Furthermore, to enable teacher forcing for **SuTraN** (as well as for *ED-LSTM*), corresponding suffix event token sequences $\tilde{\sigma}_k^s$ $=$  $\langle e_k^s, e_{k+1}^s,\dots, e_n^s \rangle$ were generated for each prefix $\tilde{\sigma}_k^p$.
+Mathematically, each case ${\sigma}=\langle {e}_1, \dots, {e}_n \rangle$ is parsed into $n$ prefix event token sequences $\tilde{\sigma}_k^p \ (k\in \{1, \dots, n\})$. Each prefix $\tilde{\sigma}_k^p$ is accompanied by the ground-truth activity and timestamp suffix targets, as well as a scalar remaining time target. However, to cater for the training mechanism implemented in the *CRTP-LSTM* benchmark, entire remaining runtime suffixes are derived. For training **SuTraN**, as well as for evaluating the remaining runtime predictions of all models, including *CRTP-LSTM*, only the first scalar remaining runtime target is needed. Furthermore, to enable teacher forcing for **SuTraN** (as well as for *ED-LSTM*), corresponding suffix event token sequences $\tilde{\sigma}_k^s = \langle {e}_k^s, {e} _{k+1}^{s}, ..., {e}_n^s \rangle$ were generated for each prefix $\tilde{\sigma}_k^p$.
 
 Following the notation used in the paper, the parsing of a case into prefix-suffix pairs can be illustrated by means of the following example. Let ${\sigma}=\langle {e}_1, \dots, {e}_4 \rangle$ be a case of length $4$. 
 
@@ -351,7 +351,7 @@ Let:
 - $N_{\mathit{train}}$, $N_{\mathit{val}}$ and $N_{\mathit{test}}$ be then number of prefix-suffix pairs (i.e. instances) derived for the train, validation and test set respectively. 
 - $W$ be the maximum sequence length (i.e. `window_size`)
 - $k_i$ be the prefix length of instance *(aka prefix-suffix pair)* $i$ $(i=0, ..., N-1)$.
-- $n_i$ be the case length of the original case ${\sigma}=\langle e_1, \dots, e_{n_i} \rangle$ that prefix-suffix pair $\{\tilde{\sigma}_{k_i}^p,\tilde{\sigma}_{k_i}^s\}$ is derived from. Consequently, every sequence of prefix event tokens $\tilde{\sigma}_{k_i}^p$ of length $k_i$ is accompanied by a sequence of suffix event tokens $\tilde{\sigma}_{k_i}^s$ of length $n_i-k_i+1$. 
+- $n_i$ be the case length of the original case ${\sigma}=\langle e_1, \dots, e_{n_i} \rangle$ that prefix-suffix pair $\{\tilde{\sigma} _{k _i}^p,\tilde{\sigma} _{k_i}^s\}$ is derived from. Consequently, every sequence of prefix event tokens $\tilde{\sigma} _{k_i}^p$ of length $k _i$ is accompanied by a sequence of suffix event tokens $\tilde{\sigma} _{k_i}^s$ of length $n_i-k_i+1$. 
 
 The following *[PyTorch](https://pytorch.org/)* tensors are contained at each index $\mathit{idx}$, e.g., for the `train_data` tuple, `train_data[idx]` contains:
 
@@ -470,7 +470,7 @@ As already mentioned in the beginning of the [Data](#data) section, after having
    - Python dictionary containing the three strings `'prefix_df'`, `'suffix_df'` and `'timeLabel_df'` as its three keys, and lists of strings as the corresponding values. Primarily the list pertaining to the `'prefix_df'`, i.e. `num_cols_dict['prefix_df']` is of interest. 
      - As explained in [subsection '7. Tensor Creation'](#7-tensor-creation), all numeric features pertaining to the prefix are contained within one specific tensor. The list `num_cols_dict['prefix_df']` contains the original string names of these numeric features, in the order in which these feature values are stored along the trailing dimension of that particular tensor. This also includes the strings `'ts_start'` and `'ts_prev'`, representing the two numeric timestamp proxies, the *time elapsed since previous event* $t_j^p$ and the *time elapsed since case start* $t_j^s$ *(see [infra](#4-create-numeric-timestamp-proxies))*. 
      - All Data-Aware (DA) models (***SuTraN*** and *CRTP-LSTM*) need to be given, i.a., a `num_numericals_pref` parameter upon initialization. This parameter should be set to the number of numeric features contained within each prefix event token. This could be derived as follows: `num_numericals_pref = len(num_cols_dict['prefix_df'])`. 
-     - All Non-Data-Aware (NDA) techniques (*SEP-LSTM*, *ED-LSTM*, *SuTraN (NDA)* and *CRTP-LSTM (NDA)*) can only process prefix event tokens consisting of solely the activity label and the two numeric time proxies. Therefore, the tensor containing the numeric prefix event features, i.e. the [tensor pertaining to $\mathit{idx}=num^c$](#7-tensor-creation), should be subsetted such that only the two numeric time features *($t_j^s$ and $t_j^p$)* are retained. To do so, the indices of these two timestamp should be retrieved. Due to the way in which this tensor is created, along its trailing dimension, the *time elapsed since previous event* $t_j^p$ feature is always stored at the index directly after the *time elapsed since case start* $t_j^s$ feature. Therefore, it suffices to retrieve the index of the latter: `tss_index = num_cols_dict['prefix_df'].index('ts_start')`.
+     - All Non-Data-Aware (NDA) techniques (*SEP-LSTM*, *ED-LSTM*, *SuTraN (NDA)* and *CRTP-LSTM (NDA)*) can only process prefix event tokens consisting of solely the activity label and the two numeric time proxies. Therefore, the [tensor containing the numeric prefix event features](#7-tensor-creation), i.e. the tensor pertaining to $\mathit{idx}=num^c$, should be subsetted such that only the two numeric time features ($t_j^s$ and $t_j^p$) are retained. To do so, the indices of these two timestamp should be retrieved. Due to the way in which this tensor is created, along its trailing dimension, the *time elapsed since previous event* $t_j^p$ feature is always stored at the index directly after the *time elapsed since case start* $t_j^s$ feature. Therefore, it suffices to retrieve the index of the latter: `tss_index = num_cols_dict['prefix_df'].index('ts_start')`.
 
 1. `log_name + _cat_cols_dict.pkl`: 
 
@@ -498,7 +498,7 @@ As already mentioned in the beginning of the [Data](#data) section, after having
      - The order in which these means and standard deviations are stored corresponds to the order in which these feature names are stored in the `num_cols_dict['prefix_df']` list, and hence also to the order in which these feature values are stored along the trailing dimension of that respective tensor. 
 
    - `train_means_dict['suffix_df']` & `train_std_dict['suffix_df']`: 
-     - The suffix event tokens *(used for SuTraN and ED-LSTM)* are comprised of an activity label, the *time elapsed since case start* $t_j^s$ and *time elapsed since previous event* $t_j^p$. The latter two numerics are stored in the [tensor pertaining to index $\mathit{idx}=num^c+3$](#7-tensor-creation). 
+     - The suffix event tokens *(used for SuTraN and ED-LSTM)* are comprised of an activity label, the *time elapsed since case start* $t_j^s$ and *time elapsed since previous event* $t_j^p$. The latter two numerics are stored in the [tensor pertaining to index](#7-tensor-creation)  $\mathit{idx}=num^c+3$. 
 
      - As such, `train_means_dict['suffix_df']` and `train_std_dict['suffix_df']` both give you a list of two floats, pertaining to respectively the training means and standard deviations of these two timestamp numerics of the suffix event tokens. 
 
@@ -527,29 +527,31 @@ As already mentioned in the beginning of the [Data](#data) section, after having
 
 ## Implementations 
 All implementations process a sequence of prefix event tokens $\langle e^p_1,..., e^p_k \rangle$, representing the observed events in an ongoing bussiness process instance, and use this to generate the following set of predictions:
-$$
-\pi(o^p_k) = 
+
+$$\pi(o^p_k) = 
 \begin{cases}
     \langle \hat{a}_{k+1},\dots,\hat{a}_{k+D-1}, \mathit{EOS} \rangle & \text{\textit{(1. activity suffix)}} \\
     \langle \hat{t}_{k+1}^p,\dots,\hat{t}_{k+D-1}^p \rangle & \text{\textit{(2. timestamp suffix)}} \\
     \hat{r}_k & \text{\textit{(3. remaining time)}}
-\end{cases}
-$$
+\end{cases}$$
+
 The manner in which these predictions are generated however, depends on the implementation itself. **Table 3** provides an overview of the re-implemented benchmarks, and SuTraN, together with their core characteristics. 
 
-***SuTraN*** and *CRTP-LSTM* are the only two Data-Aware (DA) techniques. As such, they are capable of utilizing all available features, including dynamic event features, in the prefix event tokens. As such, and in line with *Def. 3* in the paper, each prefix event token $e^p_j \ (\in \tilde{\sigma}_k^p)$ processed by these two techniques can be represented as: 
+***SuTraN*** and *CRTP-LSTM* are the only two Data-Aware (DA) techniques. As such, they are capable of utilizing all available features, including dynamic event features, in the prefix event tokens. As such, and in line with *Def. 3* in the paper, each prefix event token $e^p_j \ (\in \tilde{\sigma} _ k^p)$ processed by these two techniques can be represented as: 
+
 $$
 e^p_j = \big( a_j, t^p_j, t^s_j, (\mathit{cf}^{c}_{1,j}, ..., \mathit{cf}^{c}_{m_1^c,j}), (\mathit{ef}^c_{1,j}, ..., \mathit{ef}^{c}_{m_2^c,j}),
 (\mathit{cf}^{n}_{1,j}, ..., \mathit{cf}^{n}_{m_1^n,j}), (\mathit{ef}^{n}_{1,j}, ..., \mathit{ef}^{n}_{m_2^n,j}) \big)
 $$
+
 with: 
 - $a_j$: (integer-encoded) activity label of the $j$-th prefix event.
 - $t^p_j$: time elapsed since previous event (standardized).
 - $t^s_j$: time elapsed since case start (standardized).
-- $(\mathit{cf}^{c}_{1,j}, ..., \mathit{cf}^{c}_{m_1^c,j})$: the constant (integer-encoded) values of the $m_1^c$ categorical case features
+- $(\mathit{cf}^{c} _{1,j}, ..., \mathit{cf}^{c} _{m_1^c,j})$: the constant (integer-encoded) values of the $m_1^c$ categorical case features
 - $(\mathit{ef}^c_{1,j}, ..., \mathit{ef}^{c}_{m_2^c,j})$: the dynamic (integer-encoded) values of the $m_2^c$ categorical event features, pertaining to the $j$-th prefix event. 
-- $(\mathit{cf}^{n}_{1,j}, ..., \mathit{cf}^{n}_{m_1^n,j})$: the constant (standardized) values of the $m_1^n$ numerical case features. 
-- $(\mathit{ef}^{n}_{1,j}, ..., \mathit{ef}^{n}_{m_2^n,j})$: the dynamic (standardized) values of the $m_2^n$ numeric event features, pertaining to the $j$-th prefix event. 
+- $(\mathit{cf}^{n} _{1,j}, ..., \mathit{cf}^{n} _{m_1^n,j})$: the constant (standardized) values of the $m_1^n$ numerical case features. 
+- $(\mathit{ef}^{n} _{1,j}, ..., \mathit{ef}^{n} _{m_2^n,j})$: the dynamic (standardized) values of the $m_2^n$ numeric event features, pertaining to the $j$-th prefix event. 
 
 All Non-Data-Aware (NDA) techniques, including **SuTraN (NDA)** and *CRTP-LSTM (NDA)*, only leverage the activity label, and the two timestamp proxies. Accordingly, each NDA prefix event token $e^p_j \ (\in \tilde{\sigma}_k^p)$ can be represented as follows $e^p_j \ = \ (a_j, t_j^p, t_j^s)$. 
 
@@ -588,9 +590,9 @@ Introduce that as follows: "Before going into more detail on the ..., first some
 
 ***SuTraN*** is a full-context-aware encoder-decoder Transformer network tailored for multi-task suffix prediction in predictive process monitoring (PPM). It overcomes the limitations of existing methods by predicting entire event suffixes in a single forward pass. SuTraN combines sequence-to-sequence (seq2seq) learning, autoregressive suffix generation, explicit remaining runtime prediction, and extensive data awareness, offering an advanced solution for accurate and efficient suffix prediction.
 
-SuTraN is composed of two primary components: the encoder and the decoder. The encoder handles the processing and encoding of each prefix event $e_j \ (\in \sigma_k^p)$. It accepts the sequence $\tilde{\sigma}_k^p = \langle e_1^p, \dots, e_k^p \rangle$ of prefix event tokens and converts it into a sequence of $d_m$-dimensional prefix event embeddings $\langle h^{p,N}_{1}, \dots, h^{p,N}_{k} \rangle$ of the same length. These embeddings encapsulate the key features of each prefix event and are used as inputs for the decoder. The decoder then uses these prefix event representations to produce predictions $\pi(o^p_k)$ in an autoregressive (AR) fashion.
+SuTraN is composed of two primary components: the encoder and the decoder. The encoder handles the processing and encoding of each prefix event $e_j \ (\in \sigma_k^p)$. It accepts the sequence $\tilde{\sigma} _k^p = \langle e_1^p, \dots, e_k^p \rangle$ of prefix event tokens and converts it into a sequence of $d_m$-dimensional prefix event embeddings $\langle h^{p,N}_1, \dots, h^{p,N}_k \rangle$ of the same length. These embeddings encapsulate the key features of each prefix event and are used as inputs for the decoder. The decoder then uses these prefix event representations to produce predictions $\pi(o^p_k)$ in an autoregressive (AR) fashion.
 
-Specifically, at each decoding step $d=1, ..., D$, it forecasts the next suffix event $\pi_d(o^p_k) \ (\in \pi(o^p_k))$ based on the sequence of encoder embeddings $\langle h^{p,N}_{1}, \dots, h^{p,N}_{k} \rangle$ and the current sequence of *suffix event tokens* $\langle e_0^s, \dots, e_{d-1}^s \rangle$, which represent the suffix generated thus far. 
+Specifically, at each decoding step $d=1, ..., D$, it forecasts the next suffix event $\pi_d(o^p_k) \ (\in \pi(o^p_k))$ based on the sequence of encoder embeddings $\langle h^{p,N}_1, \dots, h^{p,N}_k \rangle$ and the current sequence of *suffix event tokens* $\langle e_0^s, \dots, e _{d-1}^s \rangle$, which represent the suffix generated thus far. 
 
 $$
 \pi_d(o^p_k) = 
@@ -600,8 +602,8 @@ $$
 \end{cases}
 $$
 
-At the end of each decoding step, a new *suffix event token* $e_d^s = (\tilde{a}_{k+d}, \tilde{t}_{k+d}^p, \tilde{t}_{k+d}^s)$ is derived from $\pi_d(o^p_k)$. Given the standardization of all numerics, including the targets, each according to their own training set mean and standard deviation, a special procedure is needed *(see [Appendix A](#appendix-a---auto-regressive-ar-inference-with-sutran))*. 
-<!-- The initial suffix token, $e_0^s$, is populated with the *activity* $a_{k}$, *time since previous* $t_{k}^p$, and *time since start* $t_{k}^s$ features of the last observed prefix event token $e^p_j$, acting as the multimodal equivalent of the *Start Of Sequence (SOS)* token in Natural Language Processing (NLP).  -->
+At the end of each decoding step, a new *suffix event token* $e_d^s = (\tilde{a} _{k+d}, \tilde{t} _{k+d}^p, \tilde{t} _{k+d}^s)$ is derived from $\pi_d(o^p_k)$. Given the standardization of all numerics, including the targets, each according to their own training set mean and standard deviation, a special procedure is needed *(see [Appendix A](#appendix-a---auto-regressive-ar-inference-with-sutran))*. 
+<!-- The initial suffix token, $e_0^s$, is populated with the *activity* $a_k$, *time since previous* $t_k^p$, and *time since start* $t_k^s$ features of the last observed prefix event token $e^p_j$, acting as the multimodal equivalent of the *Start Of Sequence (SOS)* token in Natural Language Processing (NLP).  -->
 This AR decoding process continues until the $\mathit{EOS}$ token is predicted.
 
 During the initial decoding step $d=1$, an additional scalar prediction for the remaining runtime $\hat{r}_k$ is generated. The dedicated remaining runtime prediction head is deactivated for each subsequent decoding step. 
@@ -665,7 +667,7 @@ Adhering to the original implementation, Batch Normalization, instead of Layer N
 The SEP-LSTM benchmark is trained for next event prediction only. The training procedure was entirely based on the best parameters reported by Tax et al. This includes their optimizer, learning rate scheduler, selection procedure, stopping condition and initial learning rate. 
 
 #### SEP-LSTM - Inference 
-After training, SEP-LSTM is deployed for suffix generation by means of an iterative external feedback loop, which decodes each next activity and next timestamp prediction into an additional prefix event token, which can then be fed to the model again, as if it were a completely new instance. For a more detailed explanation of this iterative feedback loop, please refer to [Appendix B - AR Inference with SEP-LSTM: External Iterative Feedback Loop](#appendix-b---ar-inference-with-sep-lstm-external-iterative-feedback-loop). After having predicted the $\mathit{EOS}$ token as the next activity, the iterative feedback loop ends, and an additional remaining runtime prediction is derived from summing the elapsed time predictions, i.e. $\hat{r}_k \ = \ \sum_{i=1}^{D-1}\hat{t}_{k+i}^p$. 
+After training, SEP-LSTM is deployed for suffix generation by means of an iterative external feedback loop, which decodes each next activity and next timestamp prediction into an additional prefix event token, which can then be fed to the model again, as if it were a completely new instance. For a more detailed explanation of this iterative feedback loop, please refer to [Appendix B - AR Inference with SEP-LSTM: External Iterative Feedback Loop](#appendix-b---ar-inference-with-sep-lstm-external-iterative-feedback-loop). After having predicted the $\mathit{EOS}$ token as the next activity, the iterative feedback loop ends, and an additional remaining runtime prediction is derived from summing the elapsed time predictions, i.e. $\hat{r} _ k  =  \sum^{D-1}_{i=1} \hat{t} _ {k+i}^p$. 
 
 > **NOTE**:
 >
@@ -738,7 +740,7 @@ The re-implemented architecture, taking into account the added activity embeddin
 1. **Categorical Embedding Stack**: Since the CRTP-LSTM is DA, it also process categorical features other than the prefix events' activity labels. Therefore, a categorical embedding stack, identical to the one of ***SuTraN***, is foreseen. 
 1. **Remaining Runtime Suffix head**: 
    - The CRTP-LSTM benchmark produces remaining runtime (RRT) suffixes, instead of timestamp suffixes. Upon inference, following the original implementation, the first remaining runtime prediction is always used as the only remaining runtime prediction for a given prefix. 
-   - As indicated by the authors, a (implicit) timestamp suffix prediction can also be derived from the predicted RRT suffixes as follows: $\hat{t}_{k+i}^p = \hat{r}_{k+i-1} - \hat{r}_{k+i}$.
+   - As indicated by the authors, a (implicit) timestamp suffix prediction can also be derived from the predicted RRT suffixes as follows: $\hat{t} _{k+i}^p = \hat{r} _{k+i-1} - \hat{r} _{k+i}$.
 
 Adhering to the original implementation, Batch Normalization, instead of Layer Normalization, was applied over the outputs of every LSTM layer. Furthermore, the output dimensionality $d_m$ of all LSTM layers was $d_m = 80$. As such, the hidden size of the bidirectional LSTM layers was 40 (=80/2). 
 
@@ -749,7 +751,7 @@ The CRTP-LSTM benchmark is trained for direct activity and remaining runtime suf
 
 Upon inference, the remaining runtime suffix generated by the CRTP-LSTM is used for two purposes:
 1. *Remaining Runtime Prediction*: the first predicted remaining runtime $\hat{r_k}$ is used as the ultimate remaining runtime prediction. 
-1. *Timestamp Suffix Prediction*: a timestamp suffix prediction is implicitly obtained as follows, $\hat{t}_{k+i}^p = \hat{r}_{k+i-1} - \hat{r}_{k+i}$. For the final (non-EOS token prediction), $\hat{t}_{k+i}^p = \hat{r}_{k+i-1}$. Also here, it should be noted that the implicitly derived timestamp suffix prediction, is only computed after having de-standardized the remaining runtime suffix predictions into the original scale of seconds. 
+1. *Timestamp Suffix Prediction*: a timestamp suffix prediction is implicitly obtained as follows, $\hat{t} _{k+i}^p = \hat{r} _ {k+i-1} - \hat{r} _ {k+i}$. For the final (non-EOS token prediction), $\hat{t} _{k+i}^p = \hat{r} _{k+i-1}$. Also here, it should be noted that the implicitly derived timestamp suffix prediction, is only computed after having de-standardized the remaining runtime suffix predictions into the original scale of seconds. 
 
 #### CRTP-LSTM - Data Format
 The CRTP-LSTM generates suffixes simultaneously, and hence not in an AR manner. Therefore, also CRTP-LSTM does not need the suffix event tokens. Furthermore, instead of the right-padded prefix event token tensors fed to SuTraN, left-padded ones are needed. 
@@ -793,7 +795,7 @@ val_dataset = (val_dataset[num_categoricals_pref-1], ) + (val_dataset[num_catego
 
 In PPM literature, very few encoder-decoder LSTMs have been proposed for the task of PPM suffix prediction. The ED-LSTM benchmark implemented here, is loosely based on the architectures implemented by [[2] and [3]](#references), which were both *Non-Data-Aware (NDA)*. 
 
-Similar to [***SuTraN***](#sutran), also the *ED-LSTM* benchmark is an encoder-decoder architecture, with the encoder responsible for processing the sequence of suffix event tokens, and the decoder responsible for generating the activity and timestamp suffixes in an Auto-Regressive (AR) fashion. At each decoding step $d=1, ..., D$, the decoder forecasts the next suffix event $\pi_d(o^p_k) = ( \hat{a}_{k+d}, \hat{t}_{k+d}^p)$ (comprised of the next suffix event's activity label and timestamp), based on the sequence of prefix event tokens $\tilde{\sigma}_k^p = \langle e_1^p, \dots, e_k^p \rangle$ processed by the encoder, and the current sequence of *suffix event tokens* $\langle e_0^s, \dots, e_{d-1}^s \rangle$, which represent the suffix generated thus far. Unlike [***SuTraN***](#sutran), the *ED-LSTM* does not explicitly predict the remaining runtime, but, similarly to the [*SEP-LSTM*](#sep-lstm), only implicitly derives it from the predicted timestamp suffix upon [inference](#ed-lstm---inference). 
+Similar to [***SuTraN***](#sutran), also the *ED-LSTM* benchmark is an encoder-decoder architecture, with the encoder responsible for processing the sequence of suffix event tokens, and the decoder responsible for generating the activity and timestamp suffixes in an Auto-Regressive (AR) fashion. At each decoding step $d=1, ..., D$, the decoder forecasts the next suffix event $\pi_d(o^p_k) = ( \hat{a} _{k+d}, \hat{t} _{k+d}^p)$ (comprised of the next suffix event's activity label and timestamp), based on the sequence of prefix event tokens $\tilde{\sigma} _k^p = \langle e_1^p, \dots, e _k^p \rangle$ processed by the encoder, and the current sequence of *suffix event tokens* $\langle e_0^s, \dots, e _{d-1}^s \rangle$, which represent the suffix generated thus far. Unlike [***SuTraN***](#sutran), the *ED-LSTM* does not explicitly predict the remaining runtime, but, similarly to the [*SEP-LSTM*](#sep-lstm), only implicitly derives it from the predicted timestamp suffix upon [inference](#ed-lstm---inference). 
 
 <!-- $\ (\in \pi(o^p_k))$ based on the sequence of encoder embeddings $\langle h_1^{p,N}, \dots, h_k^{p,N} \rangle$ and the current sequence of *suffix event tokens* $\langle e_0^s, \dots, e_{d-1}^s \rangle$, which represent the suffix generated thus far.  -->
 
@@ -954,7 +956,7 @@ Springer Nature Switzerland, 2023, pp. 146–162.
 ## Appendix 
 ### Appendix A - Auto-Regressive (AR) Inference with **SuTraN**
 Upon Inference, ***SuTraN***'s decoder auto-regressively generates both the activity and timestamp suffixes. 
-It starts, after the encoder has finished processing the prefix event tokens into encoder embeddings $\langle h^{p,N}_{1}, \dots, h^{p,N}_{k} \rangle$, with the initial suffix event token, $e_0^s$, populated with the *activity* $a_{k}$, *time since previous* $t_{k}^p$, and *time since start* $t_{k}^s$ features of the last observed prefix event. 
+It starts, after the encoder has finished processing the prefix event tokens into encoder embeddings $\langle h^{p,N}_{1}, \dots, h^{p,N}_k \rangle$, with the initial suffix event token, $e_0^s$, populated with the *activity* $a_k$, *time since previous* $t_k^p$, and *time since start* $t_k^s$ features of the last observed prefix event. 
 
 At each decoding step, the decoder predicts the the next suffix event. Based on the predicted activity label $\hat{a}_{k+d}$, and timestamp (*time elapsed since previous event*) $\hat{t}_{k+d}^p$, the new *suffix event token* $e_d^s = (\tilde{a}_{k+d}, \tilde{t}_{k+d}^p, \tilde{t}_{k+d}^s)$ is derived. However, as [discussed](#6-preprocessing-numerical-features--targets), each numeric feature and target is standardized based on its own training mean and standard deviation. Hence, the different time numerics are no longer sharing the same original scale in seconds. Therefore, one can not simply set the *time elapsed since previous event* $\tilde{t}_{k+d}^p$ of the new suffix event token equal to prediction $\hat{t}_{k+d}^p$, nor set the new *time elapsed since case start* $\tilde{t}_{k+d}^s$ feature equal to the sum of $\tilde{t}_{k+d-1}^s$ with $\hat{t}_{k+d}^p$. 
 
