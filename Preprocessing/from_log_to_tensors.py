@@ -123,7 +123,11 @@ def log_to_tensors(log,
         column. By default `None`. The default should be retained if the 
         event log does not contain an outcome label, or if no tensor 
         containing the binary outcome labels for each prefix-suffx pair 
-        (aka instance) should be generated.
+        (aka instance) should be generated. Note, if not `None`, the 
+        respective outcome column should be a binary integer column 
+        (i.e. contain either 0 or 1), and the binary value should be 
+        constant for every event (i.e. dataframe row) pertaining 
+        to the same case ID. 
 
     Returns
     -------

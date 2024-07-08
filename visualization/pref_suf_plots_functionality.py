@@ -18,7 +18,7 @@ each plot showing all models' performance trends for a specific metric.
 import pandas as pd 
 import numpy as np 
 import matplotlib.pyplot as plt
-from pref_suf_plots_utils import create_dataframes, create_plots_log, create_pref_suf_dicts, get_subset_bool
+from visualization.pref_suf_plots_utils import create_dataframes, create_plots_log, create_pref_suf_dicts, get_subset_bool
 import torch
 
 

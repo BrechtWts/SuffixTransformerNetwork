@@ -403,11 +403,7 @@ def generate_tensordata(pref_suff, case_id, act_label, cardinality_dict,
                                                window_size = window_size, 
                                                str_to_int=str_to_int)
     
-    # actLabel_tens is a single tensor (not a list) of shape (num_prefs, window_size) and contains the labels 
-    # for the remaining trace / activity predictions. NOTE that it's cardinality is +2 compared to the activity 
-    # token information in the other suffixes, since we account for a padding token (0) and an END TOKEN here. 
-    # Consequently, the dimension of the activity prediction output layer should be 
-    # cardinality_dict[act_label] + 2. 
+
     print("Generating activity label tensors ...")
     actLabel_tens = generate_actLabel_tensors(case_id, act_label, actLabel_df, cardinalities = cardinality_dict, 
                                               window_size = window_size, 
