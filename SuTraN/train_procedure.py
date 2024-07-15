@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from train_utils import MultiOutputLoss
+from SuTraN.train_utils import MultiOutputLoss
 from tqdm import tqdm
 import os
 import pandas as pd
