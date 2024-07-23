@@ -80,6 +80,15 @@ def inference_loop(model,
         deviation of the remaining runtime labels (in seconds). Needed 
         for de-standardizing remaining runtime predictions and labels, 
         such that the MAE can be expressed in seconds (and minutes). 
+    num_categoricals_pref : int 
+        The number of categorical features (including the activity label) 
+        contained within each prefix event token. Given the fact that 
+        SEP-LSTM is non-data aware (NDA), this should be set to 1. 
+    num_numericals_pref : int 
+        The number of numerical features (including the two numerical 
+        timestamp proxies) contained within each prefix event token. 
+        Given the fact that SEP-LSTM is non-data aware (NDA), this should 
+        be set to 2. 
     results_path : None or str, optional
         The absolute path name of the folder in which the final evaluation results 
         should be stored. The default of None should be retained for 

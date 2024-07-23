@@ -206,7 +206,7 @@ def train_model(model,
     avg_MAE_standardized_glob, avg_MAE_minutes_glob, avg_CE_inference_glob, avg_accuracy_glob = [], [], [], []
 
     val_loss_glob = []
-    val_loss_best = 1000
+    val_loss_best = 1e9
     
     loss_fn = MultiOutputLoss(num_classes)
 

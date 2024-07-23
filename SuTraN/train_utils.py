@@ -490,13 +490,6 @@ class MultiOutputLoss(nn.Module):
         outcome_bool : bool 
             Whether or not the model is also trained to jointly predict 
             the binary outcome (given a prefix).
-
-        NOTE (for yourself): Now indeed construct the composite loss 
-        functions for each of the different permutations. You already have 
-        quite a lot, can almost use them as is, but only change the forward 
-        calls, that it receives the outputs and labels as tuples, and that 
-        they slice it in these dedicated composite loss functions, instead 
-        of already expect them as separate tensors upon calling them, like now. 
         """
         super(MultiOutputLoss, self).__init__()
         # Creating auxiliary bools 
@@ -531,33 +524,7 @@ class MultiOutputLoss(nn.Module):
             Tuple consisting of two, three or four tensors, each 
             containing the targets for one of the two / three / four 
             prediction tasks. 
-
-        Returns
-        -------
-        loss : torch.Tensor
-            Scalar tensor. Contains the composite loss that is used for 
-            updating the gradients during training. Gradient tracking 
-            turned on.
-        cat_loss.item() : float
-            Native python float. The (masked) cross entropy loss for 
-            the next activity prediction head. Not used for gradient 
-            updates during training, but for keeping track of the 
-            different loss components during training and evaluation.
-        cont_loss1_loss.item() : float
-            Native python float. The (masked) MAE loss for the time 
-            till next event prediction head. Not used for gradient 
-            updates during training, but for keeping track of the 
-            different loss components during training and evaluation.
-        cont_loss2_loss.item() : float
-            Native python float. The (masked) MAE loss for the complete 
-            remaining runtime prediction head. Not used for gradient 
-            updates during training, but for keeping track of the 
-            different loss components during training and evaluation.
         """
-        # cat_loss = self.cat_loss_fn(cat_output, cat_target)
-        # cont_loss1 = self.cont_loss_fn_ttne(ttne_output, ttne_target)
-        # cont_loss2 = self.cont_loss_fn_rrt(rrt_output, rrt_target)
-        # loss = cat_loss + cont_loss1 + cont_loss2
 
         # First tuple component always contains the gradient tracked 
         # composite loss, the subsequent items contain the separate 

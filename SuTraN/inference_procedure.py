@@ -390,12 +390,13 @@ def inference_loop(model,
         if results_path:
             # Writing the tensors containing the DLS and MAE RRT for each individual 
             # test set instance / test set prefix-suffix pair, to disk. 
-            dam_lev_sim_path = os.path.join(subfolder_path, os.path.join(subfolder_path, 'dam_lev_similarity.pt'))
+            dam_lev_sim_path = os.path.join(subfolder_path, 'dam_lev_similarity.pt')
             torch.save(dam_lev_similarity, dam_lev_sim_path)
-
+            
             if remaining_runtime_head:
-                MAE_rrt_minutes_path = os.path.join(subfolder_path, os.path.join(subfolder_path, 'MAE_rrt_minutes.pt'))
+                MAE_rrt_minutes_path = os.path.join(subfolder_path, 'MAE_rrt_minutes.pt')
                 torch.save(MAE_rrt_minutes, MAE_rrt_minutes_path)
+
 
         # Binary outcome 
         if outcome_bool:
