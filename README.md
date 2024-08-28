@@ -3,19 +3,6 @@
 
 
 ___
-<!-- Documentation (docstrings and comment lines) SEP-, ED- and CRTP-LSTM benchmark, as well as SuTraN completely finished (14/06/2024). Preprocessing package almost fully documented. **COMING SOON**:
-- Fully completed project description (README.md), including detailled descriptions of the inner workings of all benchmarks. 
-- pre-trained models and benchmarks 
-- Scripts for end-to-end usage, from data preprocessing, to training, to evaluation (for all models). 
-- Scripts for loading pre-trained models - could be leveraged for e.g. transfer learning. 
-- ...
-
-**TO BE COMPLETED 21/06/2024** -->
-
-> **NOTE**:
->
-> At the moment, several latex constructs displaying mathematical constructs are not rendering properly on github. This issue will be resolved soon. At the moment, a previev of the README.md in a local copy of the repository, does render all constructs properly. 
-___
 
 Welcome to the official ***SuTraN*** repository, accompanying the paper "**SuTraN: an Encoder-Decoder Transformer for Full-Context-Aware Suffix Prediction of Business Processes**", submitted to the [ICPM 2024](https://icpmconference.org/2024/) conference. This repository is home to ***SuTraN***, a full-context-aware encoder-decoder transformer network specifically engineered for multi-task suffix prediction tasks within the realm of Predictive Process Monitoring (PPM). Unlike traditional approaches, SuTraN can forecast complete event suffixes in a singular forward pass, effectively integrating sequence-to-sequence learning, autoregressive suffix generation, explicit predictions of remaining runtime, and data-awareness. 
 
@@ -903,7 +890,7 @@ construct_BPIC19_datasets()
 No parameters should be specified. This function will automatically generate all variables and tuples of tensors needed, create a new subfolder called `BPIC_19` at the root of the local repo, and write the datasets, as well as all the needed variables, to disk within that subfolder. 
 
 #### 2. Train and Evaluate SuTraN and the Benchmarks 
-For every model included in the experimental setup of the paper, a dedicated end-to-end function called `train-eval()` is created, incorporating the parameters used in the experimental setup in the SuTraN paper. The table underneath contains the modules contain the `train_eval()` function pertaining to each of the models. Note that these functions can only be called for the event logs for which the datasets have already been constructed. 
+For every model included in the experimental setup of the paper, a dedicated end-to-end function called `train_eval()` is created, incorporating the parameters used in the experimental setup in the SuTraN paper. The table underneath contains the modules contain the `train_eval()` function pertaining to each of the models. Note that these functions can only be called for the event logs for which the datasets have already been constructed. 
 
 |    | Implementation   | Module     | 
 | ---| :-----------: |:-------------:| 
@@ -912,7 +899,7 @@ For every model included in the experimental setup of the paper, a dedicated end
 |  3 | [*CRTP-LSTM*](#crtp-lstm)    | ``TRAIN_EVAL_CRTP_LSTM_DA.py`` | 
 |  4 | [*CRTP-LSTM (NDA)*](#crtp-lstm)     | ``CRTP_LSTM`` | 
 |  5 | [*ED-LSTM*](#ed-lstm)    | ``TRAIN_EVAL_ED_LSTM.py`` |  
-|  6 | [*SEP-LSTM*](#ed-lstm) | ``OneStepAheadBenchmarks``     |  
+|  6 | [*SEP-LSTM*](#ed-lstm) | ``TRAIN_EVAL_SEP_LSTM.py``     |  
 
 These functions consolidate all the functionality needed for initializing the different models, training them, and automatically evaluating them by calling the appropriate functionality contained within the [subpackages](#code-overview) of each implementation. Consequently, these functions also serve as a good resource for getting familiar with the different subpackages, and the way in which their different modules interact. 
 

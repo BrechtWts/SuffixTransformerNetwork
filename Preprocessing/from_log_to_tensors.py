@@ -1,6 +1,6 @@
 """This module contains the whole preprocessing loop. It takes the 
 log as input, splits it, preprocesses it, creates prefix and suffix 
-dataframes for both the train and test sets and then it transforms 
+dataframes for both the train and test sets and then transforms 
 these into tensors. 
 """
 
@@ -70,9 +70,6 @@ def log_to_tensors(log,
         SuTraN paper, `window_size` is set to percentile 98.5 of the 
         case length distribution, i.e. the 1.5% most extreme outliers 
         in terms of case length were discarded. 
-    log_transformed : bool
-        If `True`, all the numeric features and targets with solely non-
-        negative values will be log-transformed before being standardized.
     mode : {'preferred', 'workaround'}
         Manner in which the out-of-time train-test split is performed. 
         The 'preferred' split adheres the the approach adopted from 
@@ -91,8 +88,6 @@ def log_to_tensors(log,
         contain cases having ended before the split point, while for 
         `mode='workaround'`, the test set will only contain cases having 
         started after the split point. 
-    # batch_size : int 
-    #     Batch size of the train or test set. 
     case_id : str, optional
         Column name of column containing case IDs. By default 
         'case:concept:name'. 
@@ -128,15 +123,6 @@ def log_to_tensors(log,
         (i.e. contain either 0 or 1), and the binary value should be 
         constant for every event (i.e. dataframe row) pertaining 
         to the same case ID. 
-
-    Returns
-    -------
-    _type_
-        _description_
-    ...
-    num_activities : int
-        Amount of activity labels (including padding and END token). Hence 
-        contains the amount of output neurons.
     """
     # Temporary fix, variable should be removed in all other functions as well 
     log_transformed = False
