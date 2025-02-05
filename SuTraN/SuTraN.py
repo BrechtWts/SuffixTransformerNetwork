@@ -15,7 +15,7 @@ class PositionalEncoding(nn.Module):
 
     Predominantly based on the PositionalEncoding module defined in 
     https://github.com/pytorch/examples/tree/master/word_language_model. 
-    This reimplemetation, in contrast to the original one, caters for 
+    This reimplementation, in contrast to the original one, caters for 
     adding sequence information in input embeddings where the batch 
     dimension comes first (``batch_first=True`). 
 
